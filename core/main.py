@@ -1,3 +1,5 @@
+# main.py
+
 from core.engine import CognitiveGraphEngine
 from core.memory import WorkingMemory
 from core.recursion import InternalRecursionModule
@@ -33,10 +35,16 @@ def main(task_path: str):
     # Optimization insights
     result = learner.optimize_engine(engine.history)
 
-    # Final Output
-    print("Graph Output:", graph_to_output(engine.graph))
+    # Output results
+    print("\n🧠 CGE Summary")
+    print("-" * 40)
+    print("Soul Echo History:", engine.history)
+    print("Blockchain State:")
+    for block in blockchain.to_dict():
+        print(f"  Block {block['index']} – Ψ: {block['data'].get('soul_echo', 'n/a'):.4f}, Cost: {block['data'].get('truth_cost', 'n/a'):.4f}")
+    print("Is Blockchain Valid?", blockchain.is_valid())
+    print("Dream Recursion Output:", dream)
     print("Optimization Result:", result)
-    print("Blockchain Valid:", blockchain.is_valid())
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

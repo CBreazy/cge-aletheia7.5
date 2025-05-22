@@ -1,3 +1,5 @@
+# core/rules.py
+
 from typing import Callable, Dict, List, Any
 
 class Rule:
@@ -11,15 +13,17 @@ class Rule:
         return self.condition(state)
 
     def apply_rule(self, state: Dict) -> Dict:
-        return self.apply(state)
+        print(f"[Rule Applied] {self.name}")
+        updated = self.apply(state)
+        if 'amplified' in updated:
+            print(f"  Amplified Nodes: {updated['amplified']}")
+        return updated
 
 # Example symbolic pattern operation rules (initial set)
 def basic_condition(state: Dict) -> bool:
-    # Example: check if 'pattern' key exists and is non-empty
-    return 'pattern' in state and bool(state['pattern'])
+    return 'pattern' in state and len(state['pattern']) > 0
 
 def basic_apply(state: Dict) -> Dict:
-    # Example: add mirrored pattern as symbolic resonance
     pattern = state.get('pattern', [])
     state['pattern_mirrored'] = pattern[::-1]
     return state
@@ -31,8 +35,31 @@ basic_rule = Rule(
     cost=0.1
 )
 
+# Advanced rule: amplify nodes with symbolic coherence (Ψ) above a threshold
+
+def psi_threshold_condition(state: Dict) -> bool:
+    return 'pattern' in state and len(state['pattern']) > 0
+
+def psi_threshold_apply(state: Dict) -> Dict:
+    amplified = []
+    for wrapper in state['pattern']:
+        node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+        if hasattr(node, 'psi') and callable(node.psi):
+            psi_value = node.psi()
+            if isinstance(psi_value, (int, float)) and psi_value > 0.001:
+                amplified.append(f"{node.label}_amp")
+    state['amplified'] = amplified
+    return state
+
+psi_amplifier_rule = Rule(
+    name="PsiThresholdAmplifier",
+    condition=psi_threshold_condition,
+    apply=psi_threshold_apply,
+    cost=0.2
+)
+
 # Rule Registry
 rule_registry: List[Rule] = [
     basic_rule,
-    # Future rules integrating SoulMath f-frequency, TruthSample, q-volume【19†source】【24†source】
+    psi_amplifier_rule,
 ]
