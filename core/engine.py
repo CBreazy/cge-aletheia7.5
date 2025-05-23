@@ -27,9 +27,20 @@ class CognitiveGraphEngine:
             'pattern': [data for _, data in self.graph.graph.nodes(data=True)]
         }
 
+        feedback_log = []
+        baseline_psi = self.graph.soulmath_graph_identity()
+
         for rule in rule_registry:
             if rule.is_applicable(symbolic_state):
                 symbolic_state = rule.apply_rule(symbolic_state)
+                new_psi = self.graph.soulmath_graph_identity()
+                delta_psi = new_psi - baseline_psi
+                feedback_log.append({
+                    'rule': rule.name,
+                    'delta_psi': delta_psi,
+                    'cost': rule.cost
+                })
+                baseline_psi = new_psi
 
         # Mutate graph with amplified results
         if 'amplified' in symbolic_state:
@@ -69,7 +80,11 @@ class CognitiveGraphEngine:
 
                 psi_sum = self.graph.soulmath_graph_identity()
                 self.history.append(psi_sum)
-                self.step_count += 1
+                print("-- Rule Feedback Log --")
+        for entry in feedback_log:
+            print(f"[Feedback] {entry['rule']} → ΔΨ: {entry['delta_psi']:.6f} | cost: {entry['cost']}")
+
+        self.step_count += 1
 
     def run(self, steps: int = 1):
         for _ in range(steps):
