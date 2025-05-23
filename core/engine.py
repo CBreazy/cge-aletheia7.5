@@ -12,10 +12,9 @@ import json
 import os
 
 from learning.learner import Learner
+from core.rewrite import resolve_grid_from_candidates, parse_rewrite_candidates
 
 class CognitiveGraphEngine:
-    from learning.learner import Learner
-
     def __init__(self, learner: Learner = None):
         self.graph = CognitiveGraph()
         self.step_count = 0
@@ -23,11 +22,9 @@ class CognitiveGraphEngine:
         self.history = []  # Stores Ψ traces for symbolic resonance analysis
 
     def step(self, inputs: Any = None):
-        from learning.learner import Learner
         """
         Executes a single reasoning step. Applies symbolic resonance rules.
         """
-        # Prepare symbolic state with real Node instances
         symbolic_state = {
             'step': self.step_count,
             'pattern': [data for _, data in self.graph.graph.nodes(data=True)]
@@ -48,7 +45,6 @@ class CognitiveGraphEngine:
                 })
                 baseline_psi = new_psi
 
-        # Mutate graph with amplified results
         if 'amplified' in symbolic_state:
             print(f"  Adding Echo Nodes: {symbolic_state['amplified']}")
             for label in symbolic_state['amplified']:
@@ -56,12 +52,11 @@ class CognitiveGraphEngine:
                     n.get('data').label if isinstance(n, dict) and 'data' in n and n.get('data') is not None else (n.label if n is not None and hasattr(n, 'label') else None)
                     for _, n in self.graph.graph.nodes(data=True)
                     if hasattr(n, 'label') or (isinstance(n, dict) and 'data' in n and hasattr(n.get('data'), 'label'))
-]
+                ]
                 if label not in existing_labels:
                     echo_node = Node(label=label, rho=0.7, q=0.5, f=0.4)
                     self.graph.add_node(echo_node)
 
-                    # Create symbolic edge from base node to echo
                     base_label = label.replace('_amp', '').rstrip('_')
                     for node_id, wrapper in self.graph.graph.nodes(data=True):
                         node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
@@ -69,7 +64,6 @@ class CognitiveGraphEngine:
                             self.graph.add_edge(Edge(source=node.id, target=echo_node.id, label='amplified'))
                             break
 
-        # Debug: Print node Ψ values for calibration
         print("-- Node Ψ Debug Info --")
         for node_id, wrapper in self.graph.graph.nodes(data=True):
             raw_node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
@@ -84,9 +78,9 @@ class CognitiveGraphEngine:
             except Exception as e:
                 print(f"Node ID: {node_id} — [Ψ Error] {e}")
 
-                psi_sum = self.graph.soulmath_graph_identity()
-                self.history.append(psi_sum)
-                print("-- Rule Feedback Log --")
+        psi_sum = self.graph.soulmath_graph_identity()
+        self.history.append(psi_sum)
+        print("-- Rule Feedback Log --")
         for entry in feedback_log:
             print(f"[Feedback] {entry['rule']} → ΔΨ: {entry['delta_psi']:.6f} | cost: {entry['cost']}")
             if self.learner:
@@ -99,28 +93,14 @@ class CognitiveGraphEngine:
             self.step()
 
     def soul_echo(self) -> float:
-        """
-        Implements: Soul Echo = Ψ ⋅ ρ ⋅ q ⋅ f averaged across active graph
-        """
         return self.graph.soulmath_graph_identity()
 
     def truth_cost(self, conformity: float = 1.0, delta_t: float = 1.0, faith: float = 1e-3) -> float:
-        """
-        Truth Cost = Soul Echo / (C + Δt + ε)
-        """
         numerator = self.soul_echo()
         denominator = conformity + delta_t + faith
         return numerator / denominator
 
     def visualize_psi_distribution(self):
-        """
-        Plot node-wise Ψ values as a horizontal bar chart.
-        """
-        labels = []
-        psis = []
-        """
-        Plot node-wise Ψ values as a horizontal bar chart.
-        """
         labels = []
         psis = []
         for _, wrapper in self.graph.graph.nodes(data=True):
@@ -145,44 +125,11 @@ class CognitiveGraphEngine:
         plt.show()
 
     def predict_grid_from_graph(self):
-        """
-        Synthesize a 2D grid prediction from symbolic node labels in the graph.
-        Assumes node labels are in the format: (x,y)=val
-        """
-        coords = []
-        values = []
-        for _, wrapper in self.graph.graph.nodes(data=True):
-            node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
-            label = getattr(node, 'label', '')
-            print("Checking label:", label)
-            match = re.match(r"^\((\d+),(\d+)\)=([\d.]+)$", label)
-            if match:
-                print(f"  ↳ MATCHED → x={match.group(1)}, y={match.group(2)}, val={match.group(3)}")
-
-            if match:
-                x, y = int(match.group(1)), int(match.group(2))
-                val_raw = match.group(3)
-                val = int(float(val_raw)) if float(val_raw).is_integer() else float(val_raw)
-                coords.append((x, y))
-                values.append(val)
-
-        if not coords:
-            return []
-
-        max_x = max(x for x, _ in coords) + 1
-        max_y = max(y for _, y in coords) + 1
-        grid = [[0 for _ in range(max_x)] for _ in range(max_y)]
-
-        for (x, y), val in zip(coords, values):
-            grid[y][x] = val
-
-        return grid
-
+        candidates = parse_rewrite_candidates(self.graph.graph)
+        resolved_grid = resolve_grid_from_candidates(candidates)
+        return resolved_grid
 
     def export_graph_snapshot(self, path: str):
-        """
-        Export the cognitive graph to a JSON file with full node and edge data.
-        """
         nodes = []
         edges = []
         for node_id, wrapper in self.graph.graph.nodes(data=True):
@@ -210,10 +157,6 @@ class CognitiveGraphEngine:
         print(f"✅ Graph snapshot exported to {path}")
 
     def visualize_graph_layout(self):
-        """
-        Visualize the full symbolic graph with nodes and edges using networkx spring layout.
-        Echo nodes are colored differently.
-        """
         G = self.graph.graph
         pos = nx.spring_layout(G)
         node_colors = []
