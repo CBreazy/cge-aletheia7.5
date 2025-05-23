@@ -1,10 +1,10 @@
 # main.py
 
-from core.engine import CognitiveGraphEngine
+# from core.engine import CognitiveGraphEngine  # Moved below to avoid circular import
 from core.memory import WorkingMemory
 from core.recursion import InternalRecursionModule
 from blockchain.chain import Blockchain
-from learning.learner import Learner
+# from learning.learner import Learner  # Moved below to avoid circular import
 from input_output.input import parse_arc_task
 from input_output.output import graph_to_output
 from core.graph import Node
@@ -23,15 +23,19 @@ def build_graph_from_grid(engine, grid):
                 engine.graph.add_node(node)
 
 def main(task_path: str):
+    from core.engine import CognitiveGraphEngine
+    from learning.learner import Learner
     # Load ARC task
     task = parse_arc_task(task_path)
 
     # Initialize components
-    engine = CognitiveGraphEngine()
+    blockchain = Blockchain()
+    engine = CognitiveGraphEngine(learner=None)
+    learner = Learner(blockchain=blockchain, engine=engine)
+    engine.learner = learner
     memory = WorkingMemory()
     recursion = InternalRecursionModule()
-    blockchain = Blockchain()
-    learner = Learner(blockchain=blockchain)
+    
 
     # Build symbolic graph from first training input
     first_grid = task['train'][0]['input']
@@ -73,6 +77,10 @@ def main(task_path: str):
     engine.visualize_psi_distribution()
     engine.visualize_graph_layout()
     engine.export_graph_snapshot("snapshots/graph_snapshot.json")
+    learner.summarize()
+    print("\n🏆 Top Performing Rules:")
+    for rule, score in learner.top_rules():
+        print(f"{rule}: score={score:.6f}")
 
 
 if __name__ == "__main__":

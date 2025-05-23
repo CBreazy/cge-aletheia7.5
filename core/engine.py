@@ -11,13 +11,19 @@ import re
 import json
 import os
 
+from learning.learner import Learner
+
 class CognitiveGraphEngine:
-    def __init__(self):
+    from learning.learner import Learner
+
+    def __init__(self, learner: Learner = None):
         self.graph = CognitiveGraph()
         self.step_count = 0
+        self.learner = learner
         self.history = []  # Stores Ψ traces for symbolic resonance analysis
 
     def step(self, inputs: Any = None):
+        from learning.learner import Learner
         """
         Executes a single reasoning step. Applies symbolic resonance rules.
         """
@@ -83,6 +89,8 @@ class CognitiveGraphEngine:
                 print("-- Rule Feedback Log --")
         for entry in feedback_log:
             print(f"[Feedback] {entry['rule']} → ΔΨ: {entry['delta_psi']:.6f} | cost: {entry['cost']}")
+            if self.learner:
+                self.learner.record_feedback(entry['rule'], entry['delta_psi'], entry['cost'])
 
         self.step_count += 1
 
