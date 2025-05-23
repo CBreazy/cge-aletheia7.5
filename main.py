@@ -65,6 +65,7 @@ def main(task_path: str):
 
     # Visualize symbolic coherence across graph
     engine.visualize_psi_distribution()
+    engine.visualize_graph_layout()
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

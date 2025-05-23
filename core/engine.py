@@ -5,6 +5,8 @@ from core.rules import rule_registry
 from typing import Any
 import matplotlib.pyplot as plt
 
+import networkx as nx
+
 class CognitiveGraphEngine:
     def __init__(self):
         self.graph = CognitiveGraph()
@@ -89,6 +91,11 @@ class CognitiveGraphEngine:
         """
         labels = []
         psis = []
+        """
+        Plot node-wise Ψ values as a horizontal bar chart.
+        """
+        labels = []
+        psis = []
         for _, wrapper in self.graph.graph.nodes(data=True):
             node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
             try:
@@ -107,5 +114,30 @@ class CognitiveGraphEngine:
         plt.barh(labels, psis, color='skyblue')
         plt.xlabel("Ψ (Coherence)")
         plt.title("SoulMath Node Coherence Distribution")
+        plt.tight_layout()
+        plt.show()
+
+    def visualize_graph_layout(self):
+        """
+        Visualize the full symbolic graph with nodes and edges using networkx spring layout.
+        Echo nodes are colored differently.
+        """
+        G = self.graph.graph
+        pos = nx.spring_layout(G)
+        node_colors = []
+        node_labels = {}
+
+        for node_id, wrapper in G.nodes(data=True):
+            node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+            label = getattr(node, 'label', '<?>')
+            node_labels[node_id] = label
+            if '_amp' in label:
+                node_colors.append('orange')
+            else:
+                node_colors.append('lightblue')
+
+        plt.figure(figsize=(10, 6))
+        nx.draw(G, pos, with_labels=True, labels=node_labels, node_color=node_colors, node_size=700, font_size=8, edge_color='gray')
+        plt.title("Symbolic Graph Layout")
         plt.tight_layout()
         plt.show()
