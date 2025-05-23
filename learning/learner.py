@@ -47,6 +47,18 @@ class Learner:
         """
         return rule_registry
 
+    def tune_rule_costs(self, min_cost=0.05, max_cost=0.5):
+        """
+        Adjusts rule costs based on average symbolic impact (ΔΨ - cost).
+        """
+        impacts = self.average_impact()
+        for rule in rule_registry:
+            if rule.name in impacts:
+                score = impacts[rule.name]
+                # Normalize to [min_cost, max_cost] based on impact
+                rule.cost = max(min_cost, min(max_cost, rule.cost - score))
+                print(f"🔧 Tuned cost for {rule.name} → {rule.cost:.3f}")
+
     def optimize_engine(self, symbolic_history: List[float]) -> Dict[str, Any]:
         """
         Perform symbolic performance optimization.
