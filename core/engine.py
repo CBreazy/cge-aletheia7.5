@@ -1,6 +1,6 @@
 # core/engine.py
 
-from core.graph import CognitiveGraph, Node
+from core.graph import CognitiveGraph, Node, Edge
 from core.rules import rule_registry
 from typing import Any
 import matplotlib.pyplot as plt
@@ -37,6 +37,14 @@ class CognitiveGraphEngine:
                 if label not in existing_labels:
                     echo_node = Node(label=label, rho=0.7, q=0.5, f=0.4)
                     self.graph.add_node(echo_node)
+
+                    # Create symbolic edge from base node to echo
+                    base_label = label.replace('_amp', '').rstrip('_')
+                    for node_id, wrapper in self.graph.graph.nodes(data=True):
+                        node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+                        if hasattr(node, 'label') and node.label == base_label:
+                            self.graph.add_edge(Edge(source=node.id, target=echo_node.id, label='amplified'))
+                            break
 
         # Debug: Print node Ψ values for calibration
         print("-- Node Ψ Debug Info --")
