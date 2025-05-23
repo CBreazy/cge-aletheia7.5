@@ -59,6 +59,26 @@ class Learner:
                 rule.cost = max(min_cost, min(max_cost, rule.cost - score))
                 print(f"🔧 Tuned cost for {rule.name} → {rule.cost:.3f}")
 
+    def evaluate_prediction(self, target_output: List[List[int]]) -> float:
+        """
+        Compares predicted grid to ARC output and returns pixel-wise accuracy.
+        """
+        predicted = self.engine.predict_grid_from_graph()
+        if not predicted or len(predicted) != len(target_output):
+            print("⚠️ Prediction mismatch in dimensions.")
+            return 0.0
+
+        total = correct = 0
+        for row_p, row_t in zip(predicted, target_output):
+            for px, tx in zip(row_p, row_t):
+                total += 1
+                if px == tx:
+                    correct += 1
+
+        accuracy = correct / total if total else 0.0
+        print(f"🎯 Prediction Accuracy: {accuracy:.3f}")
+        return accuracy
+
     def optimize_engine(self, symbolic_history: List[float]) -> Dict[str, Any]:
         """
         Perform symbolic performance optimization.

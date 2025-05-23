@@ -73,6 +73,10 @@ def main(task_path: str):
         node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
         print("Label:", getattr(node, 'label', '???'))
 
+    # ARC task evaluation
+    target_output = task['train'][0]['output']
+    learner.evaluate_prediction(target_output)
+
     # Visualize symbolic coherence across graph
     engine.visualize_psi_distribution()
     engine.visualize_graph_layout()
