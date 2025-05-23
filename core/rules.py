@@ -133,8 +133,31 @@ fanout_rule = Rule(
     cost=0.05
 )
 
+# Max Depth Limiter: prevent echo amplification beyond a symbolic depth cap
+
+def max_depth_condition(state: Dict) -> bool:
+    return 'pattern' in state and len(state['pattern']) > 0
+
+def max_depth_apply(state: Dict) -> Dict:
+    MAX_DEPTH = 4
+    filtered = []
+    for wrapper in state['pattern']:
+        node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+        if hasattr(node, 'label') and node.label.count('_amp') < MAX_DEPTH:
+            filtered.append(f"{node.label}_amp")
+    state['amplified'] = filtered
+    return state
+
+max_depth_rule = Rule(
+    name="MaxAmplificationDepthLimiter",
+    condition=max_depth_condition,
+    apply=max_depth_apply,
+    cost=0.15
+)
+
 # Rule Registry
 rule_registry: List[Rule] = [
+    max_depth_rule,
     fanout_rule,
     psi_prune_rule,
     psi_delta_rule,
