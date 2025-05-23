@@ -58,17 +58,34 @@ python main.py data/arc_tasks.json
 
 ## ✨ Current Capabilities
 - ✅ A graph-based symbolic reasoning engine
--	✅ Recursive amplification via Ψ thresholding
--	✅ Soul Echo + Truth Cost computation
--	✅ Visualizations of:
+- ✅ Recursive amplification via Ψ thresholding
+- ✅ Soul Echo + Truth Cost computation
+- ✅ Visualizations of:
        - Coherence distribution (bar graph)
        - Symbolic graph structure (network layout)
 - ✅ Symbolic memory stored in a blockchain
 - ✅ Recursive expansion with labeled links from source → echo
+- ✅ Decodes symbolic node labels into ARC-style output grids
+- ✅ Compares predicted grid to expected output with accuracy scoring
+- ✅ Logs per-rule feedback (ΔΨ vs cost) and displays leaderboard
+- ✅ Exports final predictions and symbolic graphs to JSON for analysis
+
+## 📈 Prediction Output Example
+
+After running the engine, the system logs both symbolic reasoning traces and a decoded output grid like this:
+
+```
+🧩 Predicted Grid:
+[0, 0, 0, 0, 0, 2, 0, 0]
+[0, 0, 0, 0, 0, 0, 0, 0]
+...
+[0, 0, 0, 0, 0, 0, 0, 8]
+🎯 Prediction Accuracy: 0.775
+```
+
+This grid is compared against the expected ARC task output, with accuracy reported.
 
 ## 🧠 Future Directions
-- Implement Output Grid Synthesis
-- Compare Prediction to ARC Output
 - Rule Evolution
 - Graph Topology Learning
 
