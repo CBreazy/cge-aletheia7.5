@@ -64,6 +64,12 @@ class Learner:
         Compares predicted grid to ARC output and returns pixel-wise accuracy.
         """
         predicted = self.engine.predict_grid_from_graph()
+
+        # Print human-readable grid
+        print("\n🧩 Predicted Grid:")
+        for row in predicted:
+            print(row)
+
         if not predicted or len(predicted) != len(target_output):
             print("⚠️ Prediction mismatch in dimensions.")
             return 0.0

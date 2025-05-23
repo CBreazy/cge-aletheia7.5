@@ -161,7 +161,8 @@ class CognitiveGraphEngine:
 
             if match:
                 x, y = int(match.group(1)), int(match.group(2))
-                val = float(match.group(3))
+                val_raw = match.group(3)
+                val = int(float(val_raw)) if float(val_raw).is_integer() else float(val_raw)
                 coords.append((x, y))
                 values.append(val)
 
