@@ -6,6 +6,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 import networkx as nx
+import re
 
 class CognitiveGraphEngine:
     def __init__(self):
@@ -116,6 +117,40 @@ class CognitiveGraphEngine:
         plt.title("SoulMath Node Coherence Distribution")
         plt.tight_layout()
         plt.show()
+
+    def predict_grid_from_graph(self):
+        """
+        Synthesize a 2D grid prediction from symbolic node labels in the graph.
+        Assumes node labels are in the format: (x,y)=val
+        """
+        coords = []
+        values = []
+        for _, wrapper in self.graph.graph.nodes(data=True):
+            node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+            label = getattr(node, 'label', '')
+            print("Checking label:", label)
+            match = re.match(r"^\((\d+),(\d+)\)=([\d.]+)$", label)
+            if match:
+                print(f"  ↳ MATCHED → x={match.group(1)}, y={match.group(2)}, val={match.group(3)}")
+
+            if match:
+                x, y = int(match.group(1)), int(match.group(2))
+                val = float(match.group(3))
+                coords.append((x, y))
+                values.append(val)
+
+        if not coords:
+            return []
+
+        max_x = max(x for x, _ in coords) + 1
+        max_y = max(y for _, y in coords) + 1
+        grid = [[0 for _ in range(max_x)] for _ in range(max_y)]
+
+        for (x, y), val in zip(coords, values):
+            grid[y][x] = val
+
+        return grid
+
 
     def visualize_graph_layout(self):
         """

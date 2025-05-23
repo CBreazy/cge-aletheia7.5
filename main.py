@@ -63,6 +63,12 @@ def main(task_path: str):
     print("Dream Recursion Output:", dream)
     print("Optimization Result:", result)
 
+    # 🔍 Debug: show node labels used in prediction
+    print("\n🧩 Graph Node Labels for Grid Prediction")
+    for _, wrapper in engine.graph.graph.nodes(data=True):
+        node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+        print("Label:", getattr(node, 'label', '???'))
+
     # Visualize symbolic coherence across graph
     engine.visualize_psi_distribution()
     engine.visualize_graph_layout()
