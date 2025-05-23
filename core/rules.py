@@ -84,8 +84,36 @@ psi_delta_rule = Rule(
     cost=0.3
 )
 
+# ΨDecayPruner: remove nodes with Ψ below a threshold
+
+def psi_decay_condition(state: Dict) -> bool:
+    return 'graph' in state and hasattr(state['graph'], 'graph')
+
+def psi_decay_apply(state: Dict) -> Dict:
+    graph = state['graph'].graph
+    low_psi_nodes = []
+    for node_id, wrapper in graph.nodes(data=True):
+        node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+        if node is not None and hasattr(node, 'psi') and callable(node.psi):
+            psi_value = node.psi()
+            if isinstance(psi_value, (int, float)) and psi_value < 0.01:
+                low_psi_nodes.append(node_id)
+
+    graph.remove_nodes_from(low_psi_nodes)
+    if low_psi_nodes:
+        print(f"  Pruned Nodes: {low_psi_nodes}")
+    return state
+
+psi_prune_rule = Rule(
+    name="PsiDecayPruner",
+    condition=psi_decay_condition,
+    apply=psi_decay_apply,
+    cost=0.1
+)
+
 # Rule Registry
 rule_registry: List[Rule] = [
+    psi_prune_rule,
     psi_delta_rule,
     basic_rule,
     psi_amplifier_rule,
