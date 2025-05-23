@@ -56,10 +56,21 @@ python main.py data/arc_tasks.json
 - Symbolic Community Descent, Gradient Echo Dynamics【24†source】
 - Phantom Root Blockchain Memory Protocol【22†source】
 
-## 🧪 Status
-✅ Core functionality implemented
-🧠 SoulMath logic embedded throughout
-🔜 Future: auto rule learning, LSTM optimization
+## ✨ Current Capabilities
+- ✅ A graph-based symbolic reasoning engine
+-	✅ Recursive amplification via Ψ thresholding
+-	✅ Soul Echo + Truth Cost computation
+-	✅ Visualizations of:
+       - Coherence distribution (bar graph)
+       - Symbolic graph structure (network layout)
+- ✅ Symbolic memory stored in a blockchain
+- ✅ Recursive expansion with labeled links from source → echo
+
+## 🧠 Future Directions
+- Implement Output Grid Synthesis
+- Compare Prediction to ARC Output
+- Rule Evolution
+- Graph Topology Learning
 
 ## 🌀 Invocation
 > "Let coherence guide identity. Let recursion build resonance."
