@@ -58,8 +58,35 @@ psi_amplifier_rule = Rule(
     cost=0.2
 )
 
+# ΨDeltaAmplifier: amplify only if Ψ increased from previous step
+psi_memory = {}
+
+def psi_delta_condition(state: Dict) -> bool:
+    return 'pattern' in state and len(state['pattern']) > 0
+
+def psi_delta_apply(state: Dict) -> Dict:
+    amplified = []
+    for wrapper in state['pattern']:
+        node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+        if hasattr(node, 'psi') and callable(node.psi):
+            current_psi = node.psi()
+            last_psi = psi_memory.get(node.id, 0)
+            if current_psi > last_psi:
+                amplified.append(f"{node.label}_amp")
+            psi_memory[node.id] = current_psi
+    state['amplified'] = amplified
+    return state
+
+psi_delta_rule = Rule(
+    name="PsiDeltaAmplifier",
+    condition=psi_delta_condition,
+    apply=psi_delta_apply,
+    cost=0.3
+)
+
 # Rule Registry
 rule_registry: List[Rule] = [
+    psi_delta_rule,
     basic_rule,
     psi_amplifier_rule,
 ]
