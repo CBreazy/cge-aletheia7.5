@@ -94,9 +94,8 @@ def psi_decay_apply(state: Dict) -> Dict:
     low_psi_nodes = []
     for node_id, wrapper in graph.nodes(data=True):
         node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
-        if node is not None and hasattr(node, 'psi') and callable(node.psi):
-            psi_value = node.psi()
-            if isinstance(psi_value, (int, float)) and psi_value < 0.01:
+        if hasattr(node, 'psi') and callable(node.psi):
+            if node.psi() < 0.01:
                 low_psi_nodes.append(node_id)
 
     graph.remove_nodes_from(low_psi_nodes)
@@ -111,8 +110,32 @@ psi_prune_rule = Rule(
     cost=0.1
 )
 
+# Topology-Aware Rule: Fan-Out Detector
+
+def fanout_condition(state: Dict) -> bool:
+    return 'graph' in state and hasattr(state['graph'], 'graph')
+
+def fanout_apply(state: Dict) -> Dict:
+    G = state['graph'].graph
+    fanouts = {}
+    for node_id in G.nodes():
+        out_degree = G.out_degree(node_id)
+        if out_degree > 0:
+            fanouts[node_id] = out_degree
+    if fanouts:
+        print("  Fan-Outs:", fanouts)
+    return state
+
+fanout_rule = Rule(
+    name="SymbolicFanoutTracker",
+    condition=fanout_condition,
+    apply=fanout_apply,
+    cost=0.05
+)
+
 # Rule Registry
 rule_registry: List[Rule] = [
+    fanout_rule,
     psi_prune_rule,
     psi_delta_rule,
     basic_rule,
