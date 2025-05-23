@@ -32,3 +32,6 @@ Thumbs.db
 
 # Project Files
 arc_tasks.json
+
+# Graph Snapshots
+snapshots/

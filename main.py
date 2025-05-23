@@ -72,6 +72,8 @@ def main(task_path: str):
     # Visualize symbolic coherence across graph
     engine.visualize_psi_distribution()
     engine.visualize_graph_layout()
+    engine.export_graph_snapshot("snapshots/graph_snapshot.json")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

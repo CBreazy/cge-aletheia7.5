@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import re
 
+import json
+import os
+
 class CognitiveGraphEngine:
     def __init__(self):
         self.graph = CognitiveGraph()
@@ -151,6 +154,36 @@ class CognitiveGraphEngine:
 
         return grid
 
+
+    def export_graph_snapshot(self, path: str):
+        """
+        Export the cognitive graph to a JSON file with full node and edge data.
+        """
+        nodes = []
+        edges = []
+        for node_id, wrapper in self.graph.graph.nodes(data=True):
+            node = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+            nodes.append({
+                'id': node.id,
+                'label': node.label,
+                'rho': node.rho,
+                'q': node.q,
+                'f': node.f,
+                'psi': node.psi()
+            })
+        for u, v, wrapper in self.graph.graph.edges(data=True):
+            edge = wrapper.get('data') if isinstance(wrapper, dict) and 'data' in wrapper else wrapper
+            edges.append({
+                'source': u,
+                'target': v,
+                'label': edge.label,
+                'weight': edge.weight
+            })
+        snapshot = {'nodes': nodes, 'edges': edges}
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w') as f:
+            json.dump(snapshot, f, indent=2)
+        print(f"✅ Graph snapshot exported to {path}")
 
     def visualize_graph_layout(self):
         """
